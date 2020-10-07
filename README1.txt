@@ -20,13 +20,30 @@ Importance of in-store navigation:
     - retail industry has already taken a hit due to COVID-19 pandemic, online stores have seen a boom
 
 Implementation:
-    - free mobile app?
-    - decision: individual stores? or shopping centres?
-    - could potentially monetise with advertisements for nearby stores
+    - Google Glass style
+    - Tailored for individual stores: must download store data beforehand (or add user prompt upon entry)
     - integrated item search with store catalogue/stock levels
-    - location services to find the particular store then fetch store details
-    - provide further incentives with occasional deals/discounts targeted to user
-    - Wi-Fi signals to triangulate user location?
-        - Can make use of Apple's Indoor Maps Program https://register.apple.com/resources/indoor/Apple-Indoor-Maps-Guidelines.pdf
-    - 
 
+Modules to Develop:
+- Audio/Speech to text and vice versa
+    - speech input from user to determine the item they want
+    - speech output to give directions
+    - speech output to confirm whether item being picked up is correct
+- Encoding store map data
+    - bitmap implementation?
+    - first bitmap to indicate aisle layout in the store
+    - bitmaps of each aisle to indicate where each item is (itemID)
+- Encoding store item locations
+    - requires access to stock database
+    - does not account for misplaced items
+- Localisation
+    - Apriltags (markers) placed around the store
+    - Vision-based navigation?
+    - Wi-Fi signals to triangulate user location
+        - Can make use of Apple's Indoor Maps Program https://register.apple.com/resources/indoor/Apple-Indoor-Maps-Guidelines.pdf
+- Store data query to locate the item
+    - requires store database
+- Path optimisation: determine the best way to get to said item
+    - to do: find an algorithm to navigate to the right aisle
+- Item detection: determine if the picked up item is correct
+    - CV techniques
