@@ -49,5 +49,4 @@ def speech2text(mode, optarg1, optarg2):
         print("invalid mode")
     
     output.save("test.mp3")
-
-speech2text(IS_CORRECT_ITEM, True, 0)
+    playsound('test.mp3')
