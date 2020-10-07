@@ -16,8 +16,6 @@ IS_CORRECT_ITEM = 3
 LEFT = 1
 RIGHT = 2
 
-print("Hello")
-
 def speech2text(mode, optarg1, optarg2):
     r = sr.Recognizer()
 

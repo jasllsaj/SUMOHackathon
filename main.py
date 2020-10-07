@@ -20,3 +20,8 @@ if __name__ == '__main__':
     config.read('config.cfg')
     numAisles = config['SHOPMAP']['numAisles']
     numLevels = config['SHOPMAP']['numLevels']
+
+    items = dict(config['ITEMS'])
+    for key in items:
+        print(key)
+
