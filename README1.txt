@@ -32,7 +32,8 @@ Modules to Develop:
 - Encoding store map data
     - bitmap implementation?
     - first bitmap to indicate aisle layout in the store
-    - bitmaps of each aisle to indicate where each item is (itemID)
+    - bitmap of each aisle to indicate where each item is (itemID)
+        - if precisely locating item, then have a bitmap of each level too (assumed 3: top, middle, bottom shelves)
 - Encoding store item locations
     - requires access to stock database
     - does not account for misplaced items
