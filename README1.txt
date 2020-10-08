@@ -1,3 +1,6 @@
+ All code written by Jason Lai for the SUMO 2020 Hackathon
+ 
+ ----------------------------- BRAINSTORMING ------------------------
  Ideas so far:
 - digital literacy
 - helping vision impaired people pick items off shelves
