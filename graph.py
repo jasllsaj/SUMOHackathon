@@ -118,22 +118,42 @@ def getEndCoord(floorMap,mode):
             x += 1
         y += 1
 
-# simple algorithm: align x then align y
-def calculatePath(current, end, floorGraph, boundaries):
+# simple algorithm: go to nearest aisle end, then align x then align y
+# isAisleEnd indicates whether the aisle end has been reached yet 
+def calculatePath(current, end, floorGraph, boundaries, isAisleEnd):
     print('(',current.x,', ',current.y,')')
+    if not isAisleEnd:
+        upper = boundaries[MIN_Y_INDEX]
+        lower = boundaries[MAX_Y_INDEX]
+        if current.y == upper or current.y == lower:
+            print('Reached aisle end')
+            isAisleEnd = True
+            return current, isAisleEnd
+        if current.y <= int((upper+lower)/2):
+            # move to top corridor
+            print('Moving towards upper corridor')
+            next = nextNode(current, UP_TUPLE, boundaries, floorGraph)
+        else:
+            # move to bottom corridor
+            print('Moving towards lower corridor')
+            if current.y > lower:
+                next = nextNode(current, UP_TUPLE, boundaries, floorGraph)
+            else:
+                next = nextNode(current, DOWN_TUPLE, boundaries, floorGraph)
+        current, isAisleEnd = calculatePath(next, end, floorGraph, boundaries, isAisleEnd)
     while current.x != end.x:
         if current.x < end.x:
             # move right
             next = nextNode(current, RIGHT_TUPLE, boundaries, floorGraph)
             if next:
                 print('moving right')
-                current = calculatePath(next, end, floorGraph, boundaries)
+                current, isAisleEnd = calculatePath(next, end, floorGraph, boundaries, isAisleEnd)
         elif current.x > end.x:
             # move left
             next = nextNode(current, LEFT_TUPLE, boundaries, floorGraph)
             if next:
                 print('moving left')
-                current = calculatePath(next, end, floorGraph, boundaries)
+                current, isAisleEnd = calculatePath(next, end, floorGraph, boundaries, isAisleEnd)
     
     while current.y != end.y:
         if current.y < end.y:
@@ -141,14 +161,14 @@ def calculatePath(current, end, floorGraph, boundaries):
             next = nextNode(current, DOWN_TUPLE, boundaries, floorGraph)
             if next:
                 print('moving down')
-                current = calculatePath(next, end, floorGraph, boundaries)
+                current, isAisleEnd = calculatePath(next, end, floorGraph, boundaries, isAisleEnd)
         elif current.y > end.y:
             # move up
             next = nextNode(current, UP_TUPLE, boundaries, floorGraph)
             if next:
                 print('moving up')
-                current = calculatePath(next, end, floorGraph, boundaries)
-    return current
+                current, isAisleEnd = calculatePath(next, end, floorGraph, boundaries, isAisleEnd)
+    return current, isAisleEnd
 # fetches node at a given coordinate
 def getNode(coord, floorGraph):
     for key in floorGraph:

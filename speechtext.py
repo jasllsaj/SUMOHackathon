@@ -14,7 +14,9 @@ GIVE_DIRECTION = 2
 IS_CORRECT_ITEM = 3
 ASK_CHECKOUT = 4
 PLAY_INIT_PROMPT = 5
-PLAY_CHECKOUT_PROMPT = 6
+PLAY_PICKUP_PROMPT = 6
+PLAY_CHECKOUT_PROMPT = 7
+THANKYOU = 8
 
 # directions
 LEFT = 1
@@ -24,6 +26,7 @@ RIGHT = 2
 INIT_PROMPT = "What would you like to find?"
 CHECKOUT_PROMPT = "Would you like to checkout?"
 NOT_FOUND_PROMPT = "Sorry. Your item could not be found."
+PICKUP_ITEM = "Please pick up an item from the"
 
 # shelves
 SHELVES = ("top", "middle", "bottom")
@@ -101,8 +104,14 @@ def playVoice (response, mode):
     elif mode == IS_CORRECT_ITEM:
         output.save('itemCheck.mp3')
         playsound('itemCheck.mp3')
+    elif mode == PLAY_PICKUP_PROMPT:
+        output.save('pickupPrompt.mp3')
+        playsound('pickupPrompt.mp3')
     elif mode == PLAY_CHECKOUT_PROMPT:
         output.save('checkoutPrompt.mp3')
         playsound('checkoutPrompt.mp3')
+    elif mode == THANKYOU:
+        output.save('thankyou.mp3')
+        playsound('thankyou.mp3')
     else:
         return
