@@ -59,14 +59,14 @@ if __name__ == '__main__':
         aisleNum = whichAisle[0]
         shelfNum = whichAisle[1]
         itemCoord = graph.getItemCoord(floorMap, aislePlan[(aisleNum, shelfNum+1)], aisleNum, int(items[correctItem])) # add one to shelf number since csv maps start from 1
-        print('item is at: ',itemCoord)
+        #print('item is at: ',itemCoord)
         destCoord = graph.getDestinationCoord(floorGraph, itemCoord)
-        print('destination is at: ',destCoord)
+        #print('destination is at: ',destCoord)
 
         if not itemCount:
             # get store entry coordinate
             startCoord = graph.getEndCoord(floorMap,graph.BMP_ENTRY)
-            print('start is at: ',startCoord)
+            #print('start is at: ',startCoord)
             start = graph.getNode(startCoord, floorGraph)
         # while you are not at the correct location
         # localise (find current location) NOT DONE AS HARDWARE REQUIRED
@@ -77,8 +77,15 @@ if __name__ == '__main__':
         
         start, isAisleEnd, facing = graph.calculatePath(start, dest, floorGraph, boundaries, False, graph.UP_TUPLE)
 
-        # now at the correct shelf. Give instruction to pick up item
-        pickupPrompt = speechtext.PICKUP_ITEM + speechtext.SHELVES[whichAisle[1]] + ' shelf.'
+        # now at the correct shelf. determine which side (left/right) the shelf is in
+        # relative to the person
+        shelfSide = graph.wayToTurn((itemCoord[0]-destCoord[0],itemCoord[1]-destCoord[1]), facing)
+        # Give instruction to pick up item
+        pickupPrompt = speechtext.PICKUP_ITEM + speechtext.SHELVES[whichAisle[1]] + ' shelf on your'
+        if shelfSide == graph.TURN_LEFT:
+            pickupPrompt += "left"
+        elif shelfSide == graph.TURN_RIGHT:
+            pickupPrompt += "right"
         speechtext.playVoice(pickupPrompt,speechtext.PLAY_PICKUP_PROMPT)
         # check if picked up item is correct
         speechtext.speech2text(speechtext.IS_CORRECT_ITEM, True, 0)

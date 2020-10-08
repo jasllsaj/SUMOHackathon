@@ -64,6 +64,7 @@ def speech2text(mode, optarg1, optarg2):
                 direction = "turn left into the "
             elif optarg1 == graph.TURN_RIGHT:
                 direction = "turn right into the "
+            
             if optarg2 == True:
                 direction = direction + "end corridor"
             else:
