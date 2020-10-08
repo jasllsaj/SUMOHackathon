@@ -20,7 +20,6 @@ if __name__ == '__main__':
     numLevels = config['SHOPMAP']['numLevels']
 
     items = dict(config['ITEMS'])
-
     checkout = False
     # keep asking for items until user wants to go to checkout
     while not checkout:
@@ -34,8 +33,14 @@ if __name__ == '__main__':
                 speechtext.playVoice(speechtext.NOT_FOUND_PROMPT, speechtext.ASK_ITEM)
             #print(correctItem)
         
-        # query store data for item location
+        # prepare graph and nodes for searching algorithm: BFS
 
+        # query store data for item location
+        itemLocations = dict(config['AISLES'])
+        whichAisle = itemLocations.get(correctItem)
+        whichAisle = eval(whichAisle) # config files store dict values as strings
+        goalPrompt = 'Your item is in Aisle. ' + str(whichAisle[0]) + '. On the ' + speechtext.SHELVES[whichAisle[1]] + ' shelf. Calculating the best route.'
+        speechtext.playVoice(goalPrompt, speechtext.GIVE_DIRECTION)
         # while you are not at the correct location
             # localise (find current location)
             # calculate the best path to the item (path optimisation)
@@ -47,7 +52,7 @@ if __name__ == '__main__':
         # once correct item is picked up, ask if person would like to go to checkout
             # if NO, repeat the process
         request = speechtext.speech2text(speechtext.ASK_CHECKOUT,0,0)
-        if 'y' in request:
+        if 'yes' in request or 'yea' in request or 'yep' in request:
             checkout = True
 
     # find best path to checkout

@@ -7,6 +7,7 @@ from gtts import gTTS
 import os
 language = 'en'
 from playsound import playsound
+
 # operating mode
 ASK_ITEM = 1
 GIVE_DIRECTION = 2
@@ -14,6 +15,7 @@ IS_CORRECT_ITEM = 3
 ASK_CHECKOUT = 4
 PLAY_INIT_PROMPT = 5
 PLAY_CHECKOUT_PROMPT = 6
+
 # directions
 LEFT = 1
 RIGHT = 2
@@ -22,6 +24,9 @@ RIGHT = 2
 INIT_PROMPT = "What would you like to find?"
 CHECKOUT_PROMPT = "Would you like to checkout?"
 NOT_FOUND_PROMPT = "Sorry. Your item could not be found."
+
+# shelves
+SHELVES = ("top", "middle", "bottom")
 
 def speech2text(mode, optarg1, optarg2):
     r = sr.Recognizer()
