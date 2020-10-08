@@ -46,9 +46,10 @@ if __name__ == '__main__':
             request = speechtext.speech2text(speechtext.ASK_ITEM, items, 0)
             if request:
                 correctItem = query.stockQuery(request, items)
-                speechtext.playVoice('you requested.'+correctItem, speechtext.ASK_ITEM)
-            if not correctItem:
-                speechtext.playVoice(speechtext.NOT_FOUND_PROMPT, speechtext.ASK_ITEM)
+                if correctItem:
+                    speechtext.playVoice('you requested.'+correctItem, speechtext.ASK_ITEM)
+                else:
+                    speechtext.playVoice(speechtext.NOT_FOUND_PROMPT, speechtext.ASK_ITEM)
         
         # query store data for item location
         whichAisle = itemLocations.get(correctItem)
