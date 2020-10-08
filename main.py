@@ -54,7 +54,7 @@ if __name__ == '__main__':
         # query store data for item location
         whichAisle = itemLocations.get(correctItem)
         whichAisle = eval(whichAisle) # config files store dict values as strings
-        goalPrompt = 'Your item is in Aisle. ' + str(whichAisle[0]) + '. On the ' + speechtext.SHELVES[whichAisle[1]] + ' shelf. Calculating the best route.'
+        goalPrompt = 'Your item is in Block. ' + str(whichAisle[0]) + '. On the ' + speechtext.SHELVES[whichAisle[1]] + ' shelf. Calculating the best route.'
         speechtext.playVoice(goalPrompt, speechtext.GIVE_DIRECTION)
 
         aisleNum = whichAisle[0]
