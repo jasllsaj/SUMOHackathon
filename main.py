@@ -1,4 +1,5 @@
 import speechtext
+import query
 import configparser
 import pandas as pd
 import numpy
@@ -20,6 +21,34 @@ if __name__ == '__main__':
 
     items = dict(config['ITEMS'])
 
-    # ask for an item
-    correctItem = speechtext.speech2text(speechtext.ASK_ITEM, items, 0)
-    print(correctItem)
+    checkout = False
+    # keep asking for items until user wants to go to checkout
+    while not checkout:
+        # keep asking for an item until there is something in stock
+        correctItem = None
+        while not correctItem:
+            request = speechtext.speech2text(speechtext.ASK_ITEM, items, 0)
+            if request:
+                correctItem = query.stockQuery(request, items)
+            if not correctItem:
+                speechtext.playVoice(speechtext.NOT_FOUND_PROMPT, speechtext.ASK_ITEM)
+            #print(correctItem)
+        
+        # query store data for item location
+
+        # while you are not at the correct location
+            # localise (find current location)
+            # calculate the best path to the item (path optimisation)
+        
+        # now at the correct shelf. Give instruction to pick up item
+        
+        # check if picked up item is correct
+
+        # once correct item is picked up, ask if person would like to go to checkout
+            # if NO, repeat the process
+        request = speechtext.speech2text(speechtext.ASK_CHECKOUT,0,0)
+        if 'y' in request:
+            checkout = True
+
+    # find best path to checkout
+    print('Calculating path to checkout')

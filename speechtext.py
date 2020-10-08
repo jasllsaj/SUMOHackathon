@@ -11,40 +11,44 @@ from playsound import playsound
 ASK_ITEM = 1
 GIVE_DIRECTION = 2
 IS_CORRECT_ITEM = 3
-
+ASK_CHECKOUT = 4
+PLAY_INIT_PROMPT = 5
+PLAY_CHECKOUT_PROMPT = 6
 # directions
 LEFT = 1
 RIGHT = 2
 
-# initial user prompt
+# user prompts
 INIT_PROMPT = "What would you like to find?"
+CHECKOUT_PROMPT = "Would you like to checkout?"
+NOT_FOUND_PROMPT = "Sorry. Your item could not be found."
 
 def speech2text(mode, optarg1, optarg2):
     r = sr.Recognizer()
 
     if mode == ASK_ITEM:
-
-        # ask what the user would like to find
-        prompt = gTTS(text=INIT_PROMPT, lang=language)
-        prompt.save('prompt.mp3')
-        playsound('prompt.mp3')
         # optarg1 is the item catalogue
-        test = sr.AudioFile('Apple.wav')
-        with test as source:
-            audio = r.record(source)
-        request = r.recognize_google(audio)
+        # ask what the user would like to find
+        playVoice(INIT_PROMPT, PLAY_INIT_PROMPT)
+        
+        # fetch audio
+        # from file source
+        #test = sr.AudioFile('Apple.wav')
+        #with test as source:
+         #   audio = r.record(source)
+        #request = r.recognize_google(audio)
 
-        # find if the requested item is available
-        foundItem = False
-        correctItem = None
-        for key in optarg1:
-            if key in request:
-                request = "You requested. " + key
-                foundItem = True
-                correctItem = key
-        if not foundItem:
-            request = "Sorry, item could not be found"
-        output = gTTS(text=request, lang=language, slow=False)
+        # from microphone
+        print('Listening...')
+        with sr.Microphone() as source:
+            audio = r.listen(source)
+        try:
+            request = (r.recognize_google(audio)).lower()
+            print(request)
+            return request
+        except Exception as e:
+            print('You said nothing!')
+            return   
     elif mode == GIVE_DIRECTION:
         # optarg1 is the correct direction, optarg2 is the aisle
         if optarg1 == LEFT:
@@ -53,7 +57,7 @@ def speech2text(mode, optarg1, optarg2):
             direction = "turn right into aisle. "
         direction = direction + str(optarg2)
         print(direction)
-        output = gTTS(text=direction, lang=language, slow=True)
+        playVoice(direction, mode)
     elif mode == IS_CORRECT_ITEM:
         # optarg1 is whether the item is correct
         if optarg1 == True:
@@ -61,10 +65,39 @@ def speech2text(mode, optarg1, optarg2):
         else:
             answer = "This is an incorrect item"
         print(answer)
-        output = gTTS(text=answer, lang=language, slow=False)
+        playVoice(answer, mode)
+    elif mode == ASK_CHECKOUT:
+        # ask user if they want to checkout
+        playVoice(CHECKOUT_PROMPT, PLAY_CHECKOUT_PROMPT)
+        # listen to their response
+        print('Listening...')
+        with sr.Microphone() as source:
+            audio = r.listen(source)
+        
+        request = None
+        while not request:
+            request = (r.recognize_google(audio)).lower()
+        print(request)
+        return request
     else:
         print("invalid mode")
-    
-    output.save("test.mp3")
-    playsound('test.mp3')
-    return correctItem
+
+def playVoice (response, mode):
+    output = gTTS(text=response, lang=language, slow=False)
+    if mode == PLAY_INIT_PROMPT:
+        output.save('initPrompt.mp3')
+        playsound('initPrompt.mp3')
+    elif mode == ASK_ITEM:
+        output.save('itemRequestResponse.mp3')
+        playsound('itemRequestResponse.mp3')
+    elif mode == GIVE_DIRECTION:
+        output.save('directions.mp3')
+        playsound('directions.mp3')
+    elif mode == IS_CORRECT_ITEM:
+        output.save('itemCheck.mp3')
+        playsound('itemCheck.mp3')
+    elif mode == PLAY_CHECKOUT_PROMPT:
+        output.save('checkoutPrompt.mp3')
+        playsound('checkoutPrompt.mp3')
+    else:
+        return
