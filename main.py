@@ -75,7 +75,7 @@ if __name__ == '__main__':
         
         dest = graph.getNode(destCoord, floorGraph)
         
-        start, isAisleEnd = graph.calculatePath(start, dest, floorGraph, boundaries, False)
+        start, isAisleEnd, facing = graph.calculatePath(start, dest, floorGraph, boundaries, False, graph.UP_TUPLE)
 
         # now at the correct shelf. Give instruction to pick up item
         pickupPrompt = speechtext.PICKUP_ITEM + speechtext.SHELVES[whichAisle[1]] + ' shelf.'
@@ -93,5 +93,5 @@ if __name__ == '__main__':
     speechtext.playVoice('Calculating path to checkout', speechtext.PLAY_CHECKOUT_PROMPT)
     checkoutCoord = graph.getEndCoord(floorMap,graph.BMP_CHECKOUT)
     checkout = graph.getNode(checkoutCoord, floorGraph)
-    graph.calculatePath(start, checkout, floorGraph, boundaries, False)
+    graph.calculatePath(start, checkout, floorGraph, boundaries, False, facing)
     speechtext.playVoice('You have arrived at the checkout. Thank you for using Shop Mapper', speechtext.THANKYOU)

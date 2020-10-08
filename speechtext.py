@@ -7,7 +7,7 @@ from gtts import gTTS
 import os
 language = 'en'
 from playsound import playsound
-
+import graph
 # operating mode
 ASK_ITEM = 1
 GIVE_DIRECTION = 2
@@ -17,10 +17,6 @@ PLAY_INIT_PROMPT = 5
 PLAY_PICKUP_PROMPT = 6
 PLAY_CHECKOUT_PROMPT = 7
 THANKYOU = 8
-
-# directions
-LEFT = 1
-RIGHT = 2
 
 # user prompts
 INIT_PROMPT = "What would you like to find?"
@@ -58,12 +54,20 @@ def speech2text(mode, optarg1, optarg2):
             print('You said nothing!')
             return   
     elif mode == GIVE_DIRECTION:
-        # optarg1 is the correct direction, optarg2 is the aisle
-        if optarg1 == LEFT:
-            direction = "turn left into aisle. "
+        # optarg1 is the correct direction, optarg2 is whether you are turning into the end corridor
+        if optarg1 == graph.STRAIGHT:
+            return
+        elif optarg1 == graph.TURN_BACK:
+            direction = "turn around."
         else:
-            direction = "turn right into aisle. "
-        direction = direction + str(optarg2)
+            if optarg1 == graph.TURN_LEFT:
+                direction = "turn left into the "
+            elif optarg1 == graph.TURN_RIGHT:
+                direction = "turn right into the "
+            if optarg2 == True:
+                direction = direction + "end corridor"
+            else:
+                direction = direction + "aisle"
         print(direction)
         playVoice(direction, mode)
     elif mode == IS_CORRECT_ITEM:

@@ -1,21 +1,38 @@
 import pandas as pd
 import csv
 import numpy
-
+import speechtext
+# features and corresponding values on occupancy matrix
 BMP_WALL = -1
 BMP_FLOOR = 0
 BMP_ENTRY = -2
 BMP_CHECKOUT = -3
 
+# directions in the store map
 RIGHT_TUPLE = (1,0)
 LEFT_TUPLE = (-1,0)
 DOWN_TUPLE = (0,1)
 UP_TUPLE = (0,-1)
 
+DIRECTIONS = {
+    RIGHT_TUPLE: 0,
+    UP_TUPLE: 1,
+    LEFT_TUPLE: 2,
+    DOWN_TUPLE: 3
+}
+
+NUM_DIRECTIONS = 4
+STRAIGHT = 0
+TURN_LEFT = 1
+TURN_RIGHT = 2
+TURN_BACK = 3
+
+# where values are stored in boundary list
 MIN_X_INDEX = 0
 MAX_X_INDEX = 1
 MIN_Y_INDEX = 2
 MAX_Y_INDEX = 3
+
 class Node:
     def __init__(self,x,y,discovered):
         self.x=x
@@ -120,7 +137,7 @@ def getEndCoord(floorMap,mode):
 
 # simple algorithm: go to nearest aisle end, then align x then align y
 # isAisleEnd indicates whether the aisle end has been reached yet 
-def calculatePath(current, end, floorGraph, boundaries, isAisleEnd):
+def calculatePath(current, end, floorGraph, boundaries, isAisleEnd, facing):
     print('(',current.x,', ',current.y,')')
     if not isAisleEnd:
         upper = boundaries[MIN_Y_INDEX]
@@ -128,47 +145,64 @@ def calculatePath(current, end, floorGraph, boundaries, isAisleEnd):
         if current.y == upper or current.y == lower:
             print('Reached aisle end')
             isAisleEnd = True
-            return current, isAisleEnd
+            return current, isAisleEnd, facing
         if current.y <= int((upper+lower)/2):
             # move to top corridor
             print('Moving towards upper corridor')
-            next = nextNode(current, UP_TUPLE, boundaries, floorGraph)
+            next, turn = nextNode(current, UP_TUPLE, boundaries, floorGraph, facing)
+            if turn:
+                speechtext.speech2text(speechtext.GIVE_DIRECTION, wayToTurn(UP_TUPLE, facing), True)
+                facing = UP_TUPLE
         else:
             # move to bottom corridor
             print('Moving towards lower corridor')
             if current.y > lower:
-                next = nextNode(current, UP_TUPLE, boundaries, floorGraph)
+                next, turn = nextNode(current, UP_TUPLE, boundaries, floorGraph, facing)
+                if turn:
+                    speechtext.speech2text(speechtext.GIVE_DIRECTION, wayToTurn(UP_TUPLE, facing), True)
+                    facing = UP_TUPLE
             else:
-                next = nextNode(current, DOWN_TUPLE, boundaries, floorGraph)
-        current, isAisleEnd = calculatePath(next, end, floorGraph, boundaries, isAisleEnd)
+                next, turn = nextNode(current, DOWN_TUPLE, boundaries, floorGraph, facing)
+                if turn:
+                    speechtext.speech2text(speechtext.GIVE_DIRECTION, wayToTurn(DOWN_TUPLE, facing), True)
+                    facing = DOWN_TUPLE
+        current, isAisleEnd, facing = calculatePath(next, end, floorGraph, boundaries, isAisleEnd, facing)
     while current.x != end.x:
         if current.x < end.x:
             # move right
-            next = nextNode(current, RIGHT_TUPLE, boundaries, floorGraph)
+            next, turn = nextNode(current, RIGHT_TUPLE, boundaries, floorGraph, facing)
             if next:
-                print('moving right')
-                current, isAisleEnd = calculatePath(next, end, floorGraph, boundaries, isAisleEnd)
+                if turn:
+                    speechtext.speech2text(speechtext.GIVE_DIRECTION, wayToTurn(RIGHT_TUPLE, facing), None)
+                    facing = RIGHT_TUPLE
+                current, isAisleEnd, facing = calculatePath(next, end, floorGraph, boundaries, isAisleEnd, facing)
         elif current.x > end.x:
             # move left
-            next = nextNode(current, LEFT_TUPLE, boundaries, floorGraph)
+            next, turn = nextNode(current, LEFT_TUPLE, boundaries, floorGraph, facing)
             if next:
-                print('moving left')
-                current, isAisleEnd = calculatePath(next, end, floorGraph, boundaries, isAisleEnd)
+                if turn:
+                    speechtext.speech2text(speechtext.GIVE_DIRECTION, wayToTurn(LEFT_TUPLE, facing), None)
+                    facing = LEFT_TUPLE
+                current, isAisleEnd, facing = calculatePath(next, end, floorGraph, boundaries, isAisleEnd, facing)
     
     while current.y != end.y:
         if current.y < end.y:
             # move down
-            next = nextNode(current, DOWN_TUPLE, boundaries, floorGraph)
+            next, turn = nextNode(current, DOWN_TUPLE, boundaries, floorGraph, facing)
             if next:
-                print('moving down')
-                current, isAisleEnd = calculatePath(next, end, floorGraph, boundaries, isAisleEnd)
+                if turn:
+                    speechtext.speech2text(speechtext.GIVE_DIRECTION, wayToTurn(DOWN_TUPLE, facing), None)
+                    facing = DOWN_TUPLE
+                current, isAisleEnd, facing = calculatePath(next, end, floorGraph, boundaries, isAisleEnd, facing)
         elif current.y > end.y:
             # move up
-            next = nextNode(current, UP_TUPLE, boundaries, floorGraph)
+            next, turn = nextNode(current, UP_TUPLE, boundaries, floorGraph, facing)
             if next:
-                print('moving up')
-                current, isAisleEnd = calculatePath(next, end, floorGraph, boundaries, isAisleEnd)
-    return current, isAisleEnd
+                if turn:
+                    speechtext.speech2text(speechtext.GIVE_DIRECTION, wayToTurn(UP_TUPLE, facing), None)
+                    facing = UP_TUPLE
+                current, isAisleEnd, facing = calculatePath(next, end, floorGraph, boundaries, isAisleEnd, facing)
+    return current, isAisleEnd, facing
 # fetches node at a given coordinate
 def getNode(coord, floorGraph):
     for key in floorGraph:
@@ -176,7 +210,7 @@ def getNode(coord, floorGraph):
             return floorGraph[key]
 
 # fetch adjacent node in a given direction
-def nextNode(current, direction, boundaries, floorGraph):
+def nextNode(current, direction, boundaries, floorGraph, facing):
     xMin = boundaries[MIN_X_INDEX]
     xMax = boundaries[MAX_X_INDEX]
     yMin = boundaries[MIN_Y_INDEX]
@@ -184,8 +218,24 @@ def nextNode(current, direction, boundaries, floorGraph):
     next = (current.x+direction[0], current.y+direction[1])
     while (getNode(next, floorGraph) not in current.adjacent) and (next[0] <= xMax) and (next[0] >= xMin) and (next[1] >= yMin) and (next[1] <= yMax):
         next = tuple(map(sum, zip(next, direction)))
-    
     if getNode(next, floorGraph) in current.adjacent:
-        return getNode(next, floorGraph)
+        if facing != direction:
+            return getNode(next, floorGraph), True
+        else:
+            return getNode(next, floorGraph), False
     else:
         return None # passed the boundary
+
+def wayToTurn(direction, facing):
+    before = DIRECTIONS[facing]
+    after = DIRECTIONS[direction]
+
+    result = (after-before) % NUM_DIRECTIONS
+    if result == 1:
+        return TURN_LEFT
+    elif result == 2:
+        return TURN_BACK
+    elif result == 3:
+        return TURN_RIGHT
+    else:
+        return STRAIGHT
